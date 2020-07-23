@@ -35,9 +35,13 @@ class Scraper
     unparsed_page = HTTParty.get(source.url)
     parsed_data = Parser.parse_table(source, unparsed_page)
     parsed_data.each do |golfer_data|
-      golfer = Golfer.find_or_initialize_by(name: golfer_data[:name])
+      golfer = golfers.find(golfer_data[:name], threshold: 0.5)
 
-      golfer.update(golfer_data)
+      if golfer
+        golfer.update(golfer_data)
+      else
+        Golfer.create(golfer_data)
+      end
     end
 
     source.update(last_fetched: DateTime.current)
@@ -49,5 +53,9 @@ class Scraper
 
   def data_sources
     @data_sources ||= DataSource.where(year: years)
+  end
+
+  def golfers
+    FuzzyMatch.new(Golfer.all, read: :name)
   end
 end

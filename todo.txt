@@ -2,5 +2,6 @@
 - dont overwrite data option
 - allow user to edit data sources
 - allow opt-in for data download
+- fuzzy match names
 - overhaul data model; create DataPoint model? golfer has_many data_points?
   - would allow user to arbitrarily collect data

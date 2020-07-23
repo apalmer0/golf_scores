@@ -5,6 +5,7 @@ ruby '2.5.0'
 
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bootstrap', '~> 4.5.0'
+gem 'fuzzy_match', '~> 2.1'
 gem 'httparty'
 gem 'jbuilder', '~> 2.7'
 gem 'jquery-rails'
