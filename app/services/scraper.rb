@@ -35,13 +35,9 @@ class Scraper
     unparsed_page = HTTParty.get(source.url)
     parsed_data = Parser.parse_table(source, unparsed_page)
     parsed_data.each do |golfer_data|
-      golfer = golfers.find(golfer_data[:name], threshold: 0.5)
+      golfer = GolferFinder.find_or_initialize_by(golfer_data[:name])
 
-      if golfer
-        golfer.update(golfer_data)
-      else
-        Golfer.create(golfer_data)
-      end
+      golfer.update(golfer_data)
     end
 
     source.update(last_fetched: DateTime.current)
