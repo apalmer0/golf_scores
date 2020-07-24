@@ -1,20 +1,21 @@
 <p id="notice"><%= notice %></p>
 
 <h1>Data Sources</h1>
+<h4><%= link_to "Golfers", golfers_path %></h4>
 
 <table class="table table-striped">
   <thead class="thead-dark">
     <tr>
       <th>Source</th>
+      <th>Last Fetched</th>
+      <th>URL</th>
       <th>Stat</th>
       <th>Year</th>
-      <th>URL</th>
       <th>Table Location</th>
       <th>Golfer Name Column</th>
       <th>Stat Column Name</th>
       <th>Destination Column Name</th>
       <th>Data Types</th>
-      <th>Last Fetched</th>
       <th></th>
       <th></th>
       <th></th>
@@ -24,16 +25,19 @@
   <tbody>
     <% @data_sources.each do |data_source| %>
       <tr>
-        <td><%= data_source.source %></td>
+        <td>
+          <%= data_source.source %>
+          <%= link_to 'Edit', edit_data_source_path(data_source) %>
+        </td>
+        <td><%= data_source.last_fetched %></td>
+        <td><%= data_source.url %></td>
         <td><%= data_source.stat %></td>
         <td><%= data_source.year %></td>
-        <td><%= data_source.url %></td>
         <td><%= data_source.table_location %></td>
         <td><%= data_source.golfer_column_name %></td>
         <td><%= data_source.source_column_names %></td>
         <td><%= data_source.destination_column_names %></td>
         <td><%= data_source.data_types %></td>
-        <td><%= data_source.last_fetched %></td>
         <td><%= link_to 'Show', data_source %></td>
         <td><%= link_to 'Edit', edit_data_source_path(data_source) %></td>
         <td><%= link_to 'Destroy', data_source, method: :delete, data: { confirm: 'Are you sure?' } %></td>
