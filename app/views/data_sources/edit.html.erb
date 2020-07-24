@@ -1,2 +1,61 @@
 <h1>DataSources#edit</h1>
-<p>Find me in app/views/data_sources/edit.html.erb</p>
+<%= link_to "Back", data_sources_path %>
+
+<%= form_with(model: @data_source, local: true) do |form| %>
+  <% if @data_source.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@data_source.errors.count, "error") %> prohibited this data source from being saved:</h2>
+
+      <ul>
+      <% @data_source.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :source %>
+    <%= form.text_field :source, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :stat %>
+    <%= form.text_field :stat, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :year %>
+    <%= form.text_field :year, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :url %>
+    <%= form.text_field :url, disabled: @data_source.rotogrinders? ? false : true %>
+  </div>
+  <div class="field">
+    <%= form.label :table_location %>
+    <%= form.text_field :table_location, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :golfer_column_name %>
+    <%= form.text_field :golfer_column_name, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :source_column_names %>
+    <%= form.text_field :source_column_names, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :destination_column_names %>
+    <%= form.text_field :destination_column_names, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :data_types %>
+    <%= form.text_field :data_types, disabled: true %>
+  </div>
+  <div class="field">
+    <%= form.label :last_fetched %>
+    <%= form.datetime_select :last_fetched, disabled: true %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit "Submit", { disabled: @data_source.rotogrinders? ? false : true } %>
+  </div>
+<% end %>
