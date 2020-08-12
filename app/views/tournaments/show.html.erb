@@ -1,0 +1,33 @@
+<p id="notice"><%= notice %></p>
+
+<h2>
+  <%= @tournament.name %> - <%= @tournament.year %>
+</h2>
+<h5>
+  <strong>PGA ID:</strong>
+  <%= @tournament.pga_id %>
+</h5>
+<%= link_to 'Back', tournaments_path %>
+
+<h3>Stats</h3>
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>Name</th>
+      <% @data_sources.each do |data_source| %>
+          <th><%= data_source.stat %></th>
+      <% end %>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @golfers.each do |golfer| %>
+      <tr>
+        <td><%= golfer.name %></td>
+        <% @data_points.where(golfer: golfer).each do |data_point| %>
+            <td><%= data_point.rank %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

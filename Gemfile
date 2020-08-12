@@ -3,12 +3,14 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.5.0'
 
+gem 'awesome_print'
 gem 'bootsnap', '>= 1.4.2', require: false
 gem 'bootstrap', '~> 4.5.0'
 gem 'fuzzy_match', '~> 2.1'
 gem 'httparty'
 gem 'jbuilder', '~> 2.7'
 gem 'jquery-rails'
+gem 'kaminari'
 gem 'pg', '~> 0.18.4'
 gem 'pry'
 gem 'puma', '~> 4.1'

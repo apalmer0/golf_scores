@@ -7,4 +7,8 @@ class GolfersController < ApplicationController
       format.csv { send_data @golfers.to_csv, filename: "GolferData-#{Date.today}.csv" }
     end
   end
+
+  def show
+    @golfer = Golfer.find(params[:id])
+  end
 end

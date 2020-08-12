@@ -1,0 +1,31 @@
+<%= form_with(model: data_source, local: true) do |form| %>
+  <% if data_source.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(data_source.errors.count, "error") %> prohibited this data source from being saved:</h2>
+
+      <ul>
+      <% data_source.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label 'stat name' %>
+    <%= form.text_field :stat %>
+  </div>
+
+  <div class="field">
+    <%= form.label 'pga id' %>
+    <%= form.text_field :pga_id %>
+  </div>
+  <div class="field">
+    <%= form.label 'Stat Column Header: must be all lowercase' %>
+    <%= form.text_field :stat_column_name %>
+  </div>
+
+  <div class="actions">
+    <%= form.submit %>
+  </div>
+<% end %>

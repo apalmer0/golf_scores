@@ -1,2 +1,5 @@
-ScraperWorker:
-  cron: "0 3 * * tue"
+TournamentScraperWorker:
+  cron: "0 0 * * mon"
+
+DataScraperWorker:
+  cron: "0 1 * * mon"

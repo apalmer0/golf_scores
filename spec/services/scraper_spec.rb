@@ -1,35 +1,193 @@
 require 'rails_helper'
 
 RSpec.describe Scraper, type: :service do
-  describe '#scrape_all' do
-    rotogrinders_data = File.read('spec/fixtures/limited_data/rotogrinders.html')
-    pga_data = File.read('spec/fixtures/limited_data/pga.html')
+  let(:pga_data) { File.read('spec/fixtures/limited_data/pga.html') }
+  let(:service) { Scraper.new }
 
-    before do
-      create(:data_source, :rotogrinders)
-      create(:data_source, :pga)
-      allow(HTTParty).to receive(:get).and_return(rotogrinders_data, pga_data)
-      allow_any_instance_of(Scraper).to receive(:sleep)
+  before(:each) do
+    allow(HTTParty).to receive(:get).and_return(pga_data)
+    allow_any_instance_of(Scraper).to receive(:sleep)
+  end
+
+  describe '#scrape_all_tournaments' do
+    context 'when tournaments were scraped recently' do
+      before do
+        create(
+          :scrape_logger,
+          :tournament,
+          run_at: DateTime.current - 5.minutes,
+        )
+      end
+
+      it 'does not make any requests' do
+        service.scrape_all_tournaments
+
+        expect(HTTParty).not_to have_received(:get)
+      end
+
+      it 'does not log a scrape' do
+        expect { service.scrape_all_tournaments }.not_to change { ScrapeLogger.tournament.count }
+      end
     end
 
-    it 'creates a new golfer' do
-      expect { Scraper.scrape_all }.to change { Golfer.count }.from(0).to(10)
+    context 'when tournaments were not scraped recently' do
+      it 'makes 1 request to the PGA site per year' do
+        service.scrape_all_tournaments
+
+        expect(HTTParty).to have_received(:get).exactly(Scraper::YEARS.length).times
+      end
+
+      it 'creates a Tournament for each tournament found' do
+        expect { service.scrape_all_tournaments }
+          .to change { Tournament.count }
+          .from(0).to(26 * Scraper::YEARS.length)
+      end
+
+      it 'logs a scrape' do
+        expect { service.scrape_new_tournaments }
+          .to change { ScrapeLogger.tournament.count }
+          .from(0).to(1)
+      end
+    end
+  end
+
+  describe '#scrape_new_tournaments' do
+    context 'when tournaments were scraped recently' do
+      before do
+        create(
+          :scrape_logger,
+          :tournament,
+          run_at: DateTime.current - 5.minutes,
+        )
+      end
+
+      it 'does not make any requests' do
+        service.scrape_new_tournaments
+
+        expect(HTTParty).not_to have_received(:get)
+      end
+
+      it 'does not log a scrape' do
+        expect { service.scrape_new_tournaments }.not_to change { ScrapeLogger.tournament.count }
+      end
     end
 
-    it 'creates a new golfer with the compiled data' do
-      Scraper.scrape_all
+    context 'when tournaments were not scraped recently' do
+      it 'makes 1 request to the 2020 PGA site' do
+        service.scrape_new_tournaments
 
-      expect(Golfer.first).to have_attributes({
-        name: 'Rory McIlroy',
-        salary: 11200,
-        putting_3_2020: 0.9906,
-      })
+        expect(HTTParty).to have_received(:get).exactly(1).times
+        expect(HTTParty).to have_received(:get).with("https://www.pgatour.com/stats/stat.02674.y2020.eon.t033.html")
+      end
+
+      it 'creates a Tournament for each tournament found' do
+        expect { service.scrape_new_tournaments }
+          .to change { Tournament.count }
+          .from(0).to(26)
+      end
+
+      it 'logs a scrape' do
+        expect { service.scrape_new_tournaments }
+          .to change { ScrapeLogger.tournament.count }
+          .from(0).to(1)
+      end
+    end
+  end
+
+  describe '#scrape_data' do
+    context 'when data was scraped recently' do
+      before do
+        create(
+          :scrape_logger,
+          :data,
+          run_at: DateTime.current - 5.minutes,
+        )
+      end
+
+      it 'does not make any requests' do
+        service.scrape_data
+
+        expect(HTTParty).not_to have_received(:get)
+      end
+
+      it 'does not log a scrape' do
+        expect { service.scrape_data }.not_to change { ScrapeLogger.data.count }
+      end
     end
 
-    it "updates the data sources with a 'last_fetched' timestamp" do
-      source = DataSource.last
+    context 'when data was not scraped recently' do
+      context 'when there are no tournaments with incomplete data' do
+        let(:data_source_1) { create(:data_source, stat: 'putting from 3', stat_column_name: '% made') }
+        let(:tournament_1) { create(:tournament, year: 1900, pga_id: 't000') }
+        let(:tournament_2) { create(:tournament, year: 1900, pga_id: 't001') }
 
-      expect { Scraper.scrape_all }.to change { source.reload.last_fetched }
+        before do
+          create(:data_point, data_source: data_source_1, tournament: tournament_1)
+          create(:data_point, data_source: data_source_1, tournament: tournament_2)
+        end
+
+        it 'does not make any requests' do
+          service.scrape_data
+
+          expect(HTTParty).not_to have_received(:get)
+        end
+
+        it 'logs a scrape' do
+          expect { service.scrape_data }
+            .to change { ScrapeLogger.data.count }
+            .from(0).to(1)
+        end
+      end
+
+      context 'when there are tournaments with incomplete data' do
+        let(:tournament_1) { create(:tournament, year: 1900, pga_id: 't000') }
+        let(:tournament_2) { create(:tournament, year: 1900, pga_id: 't001') }
+
+        let(:data_source_1) { create(:data_source, stat: 'putting from 3', stat_column_name: '% made') }
+        let!(:data_source_2) { create(:data_source, stat: 'stat 2', stat_column_name: '% made') }
+
+        before do
+          create(:data_point, data_source: data_source_1, tournament: tournament_1)
+          create(:data_point, data_source: data_source_1, tournament: tournament_2)
+        end
+
+        it 'makes 1 request to the PGA site for each tournament, for the one unaccounted-for data source' do
+          service.scrape_data
+
+          expect(HTTParty).to have_received(:get)
+          .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_1.year}.eon.#{tournament_1.pga_id}.html")
+          expect(HTTParty).to have_received(:get)
+          .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_2.year}.eon.#{tournament_2.pga_id}.html")
+          expect(HTTParty).to have_received(:get).exactly(2).times
+        end
+
+        it 'creates a new data point for each tournament/data-source/golfer combo' do
+
+          expect(DataPoint.count).to eq(2)
+
+          service.scrape_data
+
+          number_of_golfers_in_fixture = 5
+          tournaments = Tournament.count
+          initial_data_points = DataSource.count
+          expected_count = initial_data_points + (number_of_golfers_in_fixture * tournaments)
+
+          expect(DataPoint.count).to eq(expected_count)
+          expect(DataPoint.last).to have_attributes({
+            tournament: tournament_2,
+            data_source: data_source_2,
+            golfer: Golfer.find_by(name: "Bryson DeChambeau"),
+            value: '100.00',
+            rank: 1,
+            })
+        end
+
+        it 'logs a scrape' do
+          expect { service.scrape_data }
+            .to change { ScrapeLogger.data.count }
+            .from(0).to(1)
+        end
+      end
     end
   end
 end

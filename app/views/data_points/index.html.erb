@@ -1,0 +1,43 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Data Points</h1>
+<h6>Count: <%= @count_of_points %></h6>
+<h4><%= link_to "Data Points", data_points_path %></h4>
+<h4><%= link_to "Data Sources", data_sources_path %></h4>
+<h4><%= link_to "Golfers", golfers_path %></h4>
+<h4><%= link_to "Tournaments", tournaments_path %></h4>
+
+<h5>Filter</h5>
+<ul>
+  <% @data_sources.each do |source| %>
+    <li><%= link_to source.stat, data_points_path(stat: source.stat) %></li>
+  <% end %>
+</ul>
+
+<%= paginate @data_points %>
+
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>Tournament</th>
+      <th>Year</th>
+      <th>Golfer</th>
+      <th>Stat</th>
+      <th>Rank</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @data_points.each do |data_point| %>
+      <tr>
+        <td><%= data_point.tournament.name %></td>
+        <td><%= data_point.tournament.year %></td>
+        <td><%= data_point.golfer.name %></td>
+        <td><%= data_point.data_source.stat %></td>
+        <td><%= data_point.rank %></td>
+        <td><%= data_point.value %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,57 +1,108 @@
 class Scraper
-  def self.scrape_data(years)
-    new(years).scrape_data
+  YEARS = [
+    2015,
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+  ]
+  SECONDS_BETWEEN_REQUESTS = 5
+
+  def self.scrape_new_tournaments
+    new.scrape_new_tournaments
   end
 
-  def self.scrape_all
-    new([2019, 2020]).scrape_data
+  def self.scrape_data
+    new.scrape_data
   end
 
-  def self.scrape_2019
-    new([2019]).scrape_data
+  def scrape_all_tournaments
+    return if tournament_scraped_recently?
+
+    YEARS.each do |year|
+      scrape_for_tournaments(year)
+
+      sleep(SECONDS_BETWEEN_REQUESTS)
+    end
+
+    log_scrape(:tournament)
   end
 
-  def self.scrape_2020
-    new([2020]).scrape_data
-  end
+  def scrape_new_tournaments
+    return if tournament_scraped_recently?
 
-  def initialize(years)
-    @years = years
+    scrape_for_tournaments(2020)
+
+    log_scrape(:tournament)
   end
 
   def scrape_data
-    scrape_sources(data_sources)
-  end
+    return if data_scraped_recently?
 
-  def scrape_sources(sources)
-    sources.each do |source|
-      scrape_source(source)
+    Tournament.with_incomplete_data.each do |tournament|
+      DataSource.not_yet_pulled_for(tournament).each do |source|
+        url = url_builder(source, tournament)
 
-      sleep(5)
+        unparsed_page = HTTParty.get(url)
+        results = Parser.parse_table(unparsed_page, source)
+
+        results.each do |data|
+          golfer = GolferFinder.find_or_create_by(data[:name])
+
+          DataPoint.create(
+            tournament: tournament,
+            golfer: golfer,
+            data_source: source,
+            value: data[:stat],
+            rank: data[:rank],
+          )
+        end
+
+        sleep(SECONDS_BETWEEN_REQUESTS)
+      end
     end
-  end
 
-  def scrape_source(source)
-    unparsed_page = HTTParty.get(source.url)
-    parsed_data = Parser.parse_table(source, unparsed_page)
-    parsed_data.each do |golfer_data|
-      golfer = GolferFinder.find_or_initialize_by(golfer_data[:name])
-
-      golfer.update(golfer_data)
-    end
-
-    source.update(last_fetched: DateTime.current)
+    log_scrape(:data)
   end
 
   private
 
-  attr_reader :years
+  def data_scraped_recently?
+    return false if !ScrapeLogger.data.last
 
-  def data_sources
-    @data_sources ||= DataSource.where(year: years)
+    ScrapeLogger.data.last.run_at > 1.hour.ago
   end
 
-  def golfers
-    FuzzyMatch.new(Golfer.all, read: :name)
+  def tournament_scraped_recently?
+    return false if !ScrapeLogger.tournament.last
+
+    ScrapeLogger.tournament.last.run_at > 1.hour.ago
+  end
+
+  def log_scrape(role)
+    ScrapeLogger.create(
+      run_at: DateTime.current,
+      role: role,
+    )
+  end
+
+  def scrape_for_tournaments(year)
+    url = "https://www.pgatour.com/stats/stat.02674.y#{year}.eon.t033.html"
+    unparsed_page = HTTParty.get(url)
+    parsed_tournaments = Parser.parse_tournaments(unparsed_page)
+
+    parsed_tournaments.each do |tournament_data|
+      data = {
+        **tournament_data,
+        year: year,
+      }
+
+      Tournament.find_or_create_by(data)
+    end
+  end
+
+  def url_builder(source, tournament)
+    "https://www.pgatour.com/content/pgatour/stats/stat.#{source.pga_id}.y#{tournament.year}.eon.#{tournament.pga_id}.html"
   end
 end

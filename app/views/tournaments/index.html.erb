@@ -1,0 +1,37 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Tournaments</h1>
+<h4><%= link_to "Data Points", data_points_path %></h4>
+<h4><%= link_to "Data Sources", data_sources_path %></h4>
+<h4><%= link_to "Golfers", golfers_path %></h4>
+<h4><%= link_to "Tournaments", tournaments_path %></h4>
+
+<h5>Filter</h5>
+<%= link_to 'Clear filters', tournaments_path %>
+<ul>
+  <% @years.each do |year| %>
+    <li><%= link_to year, tournaments_path(year: year) %></li>
+  <% end %>
+</ul>
+
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>Year</th>
+      <th>Stats Pulled</th>
+      <th>Name</th>
+      <th>Tournament ID</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @tournaments.each do |tournament| %>
+      <tr>
+        <td><%= tournament.year %></td>
+        <td><%= tournament.sources_scraped.count %>/<%= @stats_count %></td>
+        <td><%= link_to tournament.name, tournament %></td>
+        <td><%= link_to tournament.pga_id, tournaments_path(pga_id: tournament.pga_id) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,2 +1,5 @@
-<h1>DataSources#new</h1>
-<p>Find me in app/views/data_sources/new.html.erb</p>
+<h1>New Data Source</h1>
+
+<%= render 'form', data_source: @data_source %>
+
+<%= link_to 'Back', data_sources_path %>
