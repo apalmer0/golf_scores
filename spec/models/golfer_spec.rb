@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe Golfer, type: :model do
   describe "associations" do
     it { should have_many(:data_points) }
+    it { should have_many(:tournaments).through(:data_points) }
   end
 
   describe "validations" do
