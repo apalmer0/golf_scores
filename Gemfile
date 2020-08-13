@@ -12,6 +12,7 @@ gem 'jbuilder', '~> 2.7'
 gem 'jquery-rails'
 gem 'kaminari'
 gem 'pg', '~> 0.18.4'
+gem "pg_search", "~> 2.1.4"
 gem 'pry'
 gem 'puma', '~> 4.1'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.2'

@@ -6,6 +6,12 @@
 <h4><%= link_to "Golfers", golfers_path %></h4>
 <h4><%= link_to "Tournaments", tournaments_path %></h4>
 
+<h5>Search</h5>
+<%= form_tag tournaments_path, method: :get do %>
+  <%= text_field_tag :search, params[:search] %>
+  <%= submit_tag "search" %>
+<% end %>
+
 <h5>Filter</h5>
 <%= link_to 'Clear filters', tournaments_path %>
 <ul>

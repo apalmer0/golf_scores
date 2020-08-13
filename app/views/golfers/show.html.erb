@@ -1,10 +1,29 @@
 <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Name:</strong>
+<h1>
   <%= @golfer.name %>
-</p>
+</h1>
 
 <ul>
   <li><%= link_to 'Back', golfers_path %></li>
 </ul>
+
+<table class="table table-striped">
+  <thead class="thead-dark">
+    <tr>
+      <th>Year</th>
+      <th>Name</th>
+      <th>Finish</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @tournaments.each do |tournament| %>
+      <tr>
+        <td><%= tournament.year %></td>
+        <td><%= link_to tournament.name, tournament %></td>
+        <td></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
