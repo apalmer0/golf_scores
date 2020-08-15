@@ -103,6 +103,12 @@ class Scraper
   end
 
   def url_builder(source, tournament)
-    "https://www.pgatour.com/content/pgatour/stats/stat.#{source.pga_id}.y#{tournament.year}.eon.#{tournament.pga_id}.html"
+    if source.results_stat?
+      name = tournament.name.gsub(" ", "-").downcase
+
+      "https://www.pgatour.com/tournaments/#{name}/past-results/jcr:content/mainParsys/pastresults.selectedYear.#{tournament.year}.html"
+    else
+      "https://www.pgatour.com/content/pgatour/stats/stat.#{source.pga_id}.y#{tournament.year}.eon.#{tournament.pga_id}.html"
+    end
   end
 end

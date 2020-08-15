@@ -1,7 +1,10 @@
 class Parser
-  TABLE_LOCATION = 'table#statsTable'.freeze
+  STATS_TABLE_LOCATION = 'table#statsTable'.freeze
+  RESULTS_TABLE_LOCATION = 'table.table-styled'.freeze
   TOURNAMENT_DROPDOWN = '.statistics-details-select--tournament'.freeze
-  PLAYER_NAME = 'player name'.freeze
+  STATS_PLAYER_NAME = 'player name'.freeze
+  RESULTS_PLAYER_NAME = 'player'.freeze
+  RESULTS_COLUMN = 'td.total-score'.freeze
   RANK_COLUMN = 'rank this week'.freeze
 
   def self.parse_table(unparsed_page, data_source)
@@ -47,7 +50,9 @@ class Parser
   end
 
   def table
-    @table ||= parsed_page.css(TABLE_LOCATION)
+    table_location = data_source.results_stat? ? RESULTS_TABLE_LOCATION : STATS_TABLE_LOCATION
+
+    @table ||= parsed_page.css(table_location)
   end
 
   def headers
@@ -66,21 +71,38 @@ class Parser
     @table_rows ||= table.css('tbody').css('tr')
   end
 
+  def scores
+    @scores ||= table_rows.map { |row| row.css(RESULTS_COLUMN).text }
+  end
+
+  def finish
+    @finish ||= scores.map { |score| scores.index(score) + 1 }
+  end
+
   def data
-    @data ||= table_rows.map do |tr|
+    @data ||= table_rows.map.with_index do |tr, index|
       row_data = tr.css('td').map { |td| td.text.gsub("\t", "").strip }
 
-      {
-        name: row_data[name_index],
-        rank: row_data[rank_index].delete('^0-9').to_i,
-        stat: row_data[stat_index],
-      }
+      if data_source.results_stat?
+        {
+          name: row_data[name_index],
+          rank: finish[index],
+          stat: scores[index],
+        }
+      else
+        {
+          name: row_data[name_index],
+          rank: row_data[rank_index].delete('^0-9').to_i,
+          stat: row_data[stat_index],
+        }
+      end
+
 
     end.compact
   end
 
   def name_index
-    @name_index ||= headers.index(PLAYER_NAME)
+    @name_index ||= data_source.results_stat? ? headers.index(RESULTS_PLAYER_NAME) : headers.index(STATS_PLAYER_NAME)
   end
 
   def rank_index

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe Scraper, type: :service do
-  let(:pga_data) { File.read('spec/fixtures/limited_data/pga.html') }
+  let(:pga_data) { File.read('spec/fixtures/limited_data/stats.html') }
   let(:service) { Scraper.new }
 
   before(:each) do

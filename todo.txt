@@ -1,28 +1,10 @@
-- scope tournaments to somehow check for new tournaments - no data points? (tournament.data_points.uniq.count == 0)
-- scope data source to somehow check for those that haven't been pulled yet (data_source.data_points.count == 0)
--- but what if you add a new data source without a new tournament? you'd have to run all the tournaments again.
--- so you need to run all tournaments for which there's at least one data source with 0 data points.
--- but if you just add a tournament without changing the data sources, then you'd only have tournaments with
--- data sources with all data points already pulled.
-
--- what about tournaments where data_sources.uniq.count != data_sources.count?
--- data sources come from data points, so adding a new data source would make all tournaments qualify,
--- and new tournaments would have 0 data points and therefore 0 data sources
-** that's the scope for tournaments. now how to write it...
-
--- what's the scope for data sources? you've got the tournaments you want to run, which data sources do you pull?
--- this will have to be a function of the tournament, right?
--- data sources for which there are no data points for that tournament?
--- any data sources that aren't already accounted for in the tournament
-
-
 - run scrape_everything any time tournament or data source changes?
 - run correlations
 - provide output - what format?
-- get results for each tournament - where?
-- run scrape_everything in sidekiq to get all data. maybe delay between calls even more? going to be 3975 calls currently.
-  - 3,975 requests
-  - 2 seconds between requests, call it 3 seconds per
-  - 11,925 seconds
-  - 198 minutes
-  - 3.3125 hours - 3 hours 18.75 minutes
+- create ParsedPage model
+  - StatsPage, ResultsPage inherit from ParsedPage
+  - ParsedPage has methods that get overwritten
+    - table
+    - headers
+    - rows
+      - array of parsed row data
