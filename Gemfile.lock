@@ -150,6 +150,7 @@ GEM
     nio4r (2.5.2)
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
+    pearson (1.1.0)
     pg (0.18.4)
     pg_search (2.1.7)
       activerecord (>= 4.2)
@@ -302,6 +303,7 @@ DEPENDENCIES
   jquery-rails
   kaminari
   listen (~> 3.2)
+  pearson (~> 1.0)
   pg (~> 0.18.4)
   pg_search (~> 2.1.4)
   pry

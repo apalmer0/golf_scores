@@ -9,6 +9,25 @@
 </h5>
 <%= link_to 'Back', tournaments_path %>
 
+<h3>Correlations</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Stat</th>
+      <th>Correlation</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @correlations.each do |stat, correlation| %>
+      <tr>
+        <td><%= stat %></td>
+        <td><%= correlation %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
 <h3>Stats</h3>
 <table class="table table-striped">
   <thead class="thead-dark">

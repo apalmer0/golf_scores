@@ -1,5 +1,4 @@
 - run scrape_everything any time tournament or data source changes?
-- run correlations
 - provide output - what format?
 - create ParsedPage model
   - StatsPage, ResultsPage inherit from ParsedPage
