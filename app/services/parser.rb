@@ -21,11 +21,34 @@ class Parser
   end
 
   def parse_table
-    data
+    table_rows.map.with_index do |tr, index|
+      row_data = tr.css('td').map { |td| td.text.gsub("\t", "").strip }
+
+      if data_source.results_stat?
+        {
+          name: row_data[name_index],
+          rank: finish[index],
+          stat: scores[index],
+        }
+      else
+        {
+          name: row_data[name_index],
+          rank: row_data[rank_index].delete('^0-9').to_i,
+          stat: row_data[stat_index],
+        }
+      end
+
+
+    end.compact
   end
 
   def parse_tournaments
-    tournaments
+    tournament_options.map do |option|
+      {
+        pga_id: option.values[0],
+        name: option.text,
+      }
+    end
   end
 
   private
@@ -38,15 +61,6 @@ class Parser
 
   def tournament_options
     @tournament_options ||= parsed_page.css(TOURNAMENT_DROPDOWN).css('option')
-  end
-
-  def tournaments
-    @tournaments ||= tournament_options.map do |option|
-      {
-        pga_id: option.values[0],
-        name: option.text,
-      }
-    end
   end
 
   def table
@@ -77,28 +91,6 @@ class Parser
 
   def finish
     @finish ||= scores.map { |score| scores.index(score) + 1 }
-  end
-
-  def data
-    @data ||= table_rows.map.with_index do |tr, index|
-      row_data = tr.css('td').map { |td| td.text.gsub("\t", "").strip }
-
-      if data_source.results_stat?
-        {
-          name: row_data[name_index],
-          rank: finish[index],
-          stat: scores[index],
-        }
-      else
-        {
-          name: row_data[name_index],
-          rank: row_data[rank_index].delete('^0-9').to_i,
-          stat: row_data[stat_index],
-        }
-      end
-
-
-    end.compact
   end
 
   def name_index
