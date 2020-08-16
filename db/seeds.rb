@@ -76,6 +76,9 @@ data_sources = [
     stat_column_name: 'average',
     pga_id: '02564',
   },
+  {
+    stat: DataSource::RESULTS,
+  },
 ]
 
 data_sources.each do |source|

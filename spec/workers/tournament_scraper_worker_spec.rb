@@ -5,12 +5,12 @@ RSpec.describe TournamentScraperWorker, type: :worker do
 
     subject(:worker) { TournamentScraperWorker.new }
 
-    it 'calls #scrape_new_tournaments on TournamentScraper' do
-      allow(Scraper).to receive(:scrape_new_tournaments)
+    it 'calls #scrape_for_new_tournaments on TournamentScraper' do
+      allow(Scraper).to receive(:scrape_for_new_tournaments)
 
       worker.perform
 
-      expect(Scraper).to have_received(:scrape_new_tournaments)
+      expect(Scraper).to have_received(:scrape_for_new_tournaments)
     end
   end
 end

@@ -9,15 +9,15 @@ class Scraper
   ]
   SECONDS_BETWEEN_REQUESTS = 5
 
-  def self.scrape_new_tournaments
-    new.scrape_new_tournaments
+  def self.scrape_for_new_tournaments
+    new.scrape_for_new_tournaments
   end
 
-  def self.scrape_data
-    new.scrape_data
+  def self.scrape_data_from_all_tournaments
+    new.scrape_data_from_all_tournaments
   end
 
-  def scrape_all_tournaments
+  def scrape_for_all_tournaments
     return if tournament_scraped_recently?
 
     YEARS.each do |year|
@@ -29,7 +29,7 @@ class Scraper
     log_scrape(:tournament)
   end
 
-  def scrape_new_tournaments
+  def scrape_for_new_tournaments
     return if tournament_scraped_recently?
 
     scrape_for_tournaments(2020)
@@ -37,33 +37,47 @@ class Scraper
     log_scrape(:tournament)
   end
 
-  def scrape_data
+  def scrape_data_from_all_tournaments
     return if data_scraped_recently?
 
     Tournament.with_incomplete_data.each do |tournament|
-      DataSource.not_yet_pulled_for(tournament).each do |source|
-        url = url_builder(source, tournament)
-
-        unparsed_page = HTTParty.get(url)
-        results = Parser.parse_table(unparsed_page, source)
-
-        results.each do |data|
-          golfer = GolferFinder.find_or_create_by(data[:name])
-
-          DataPoint.create(
-            tournament: tournament,
-            golfer: golfer,
-            data_source: source,
-            value: data[:stat],
-            rank: data[:rank],
-          )
-        end
-
-        sleep(SECONDS_BETWEEN_REQUESTS)
-      end
+      scrape_tournament(tournament)
     end
 
     log_scrape(:data)
+  end
+
+  def scrape_tournament_series(pga_id)
+    Tournament.where(pga_id: pga_id).each do |tournament|
+      scrape_tournament(tournament)
+    end
+  end
+
+  def scrape_tournament(tournament)
+    DataSource.not_yet_pulled_for(tournament).each do |source|
+      scrape_data_source(source, tournament)
+    end
+  end
+
+  def scrape_data_source(source, tournament)
+    url = url_builder(source, tournament)
+
+    unparsed_page = HTTParty.get(url)
+    results = Parser.parse_table(unparsed_page, source)
+
+    results.each do |data|
+      golfer = GolferFinder.find_or_create_by(data[:name])
+
+      DataPoint.create(
+        tournament: tournament,
+        golfer: golfer,
+        data_source: source,
+        value: data[:stat],
+        rank: data[:rank],
+      )
+    end
+
+    sleep(SECONDS_BETWEEN_REQUESTS)
   end
 
   private

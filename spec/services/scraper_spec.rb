@@ -9,7 +9,7 @@ RSpec.describe Scraper, type: :service do
     allow_any_instance_of(Scraper).to receive(:sleep)
   end
 
-  describe '#scrape_all_tournaments' do
+  describe '#scrape_for_all_tournaments' do
     context 'when tournaments were scraped recently' do
       before do
         create(
@@ -20,38 +20,38 @@ RSpec.describe Scraper, type: :service do
       end
 
       it 'does not make any requests' do
-        service.scrape_all_tournaments
+        service.scrape_for_all_tournaments
 
         expect(HTTParty).not_to have_received(:get)
       end
 
       it 'does not log a scrape' do
-        expect { service.scrape_all_tournaments }.not_to change { ScrapeLogger.tournament.count }
+        expect { service.scrape_for_all_tournaments }.not_to change { ScrapeLogger.tournament.count }
       end
     end
 
     context 'when tournaments were not scraped recently' do
       it 'makes 1 request to the PGA site per year' do
-        service.scrape_all_tournaments
+        service.scrape_for_all_tournaments
 
         expect(HTTParty).to have_received(:get).exactly(Scraper::YEARS.length).times
       end
 
       it 'creates a Tournament for each tournament found' do
-        expect { service.scrape_all_tournaments }
+        expect { service.scrape_for_all_tournaments }
           .to change { Tournament.count }
           .from(0).to(26 * Scraper::YEARS.length)
       end
 
       it 'logs a scrape' do
-        expect { service.scrape_new_tournaments }
+        expect { service.scrape_for_new_tournaments }
           .to change { ScrapeLogger.tournament.count }
           .from(0).to(1)
       end
     end
   end
 
-  describe '#scrape_new_tournaments' do
+  describe '#scrape_for_new_tournaments' do
     context 'when tournaments were scraped recently' do
       before do
         create(
@@ -62,39 +62,39 @@ RSpec.describe Scraper, type: :service do
       end
 
       it 'does not make any requests' do
-        service.scrape_new_tournaments
+        service.scrape_for_new_tournaments
 
         expect(HTTParty).not_to have_received(:get)
       end
 
       it 'does not log a scrape' do
-        expect { service.scrape_new_tournaments }.not_to change { ScrapeLogger.tournament.count }
+        expect { service.scrape_for_new_tournaments }.not_to change { ScrapeLogger.tournament.count }
       end
     end
 
     context 'when tournaments were not scraped recently' do
       it 'makes 1 request to the 2020 PGA site' do
-        service.scrape_new_tournaments
+        service.scrape_for_new_tournaments
 
         expect(HTTParty).to have_received(:get).exactly(1).times
         expect(HTTParty).to have_received(:get).with("https://www.pgatour.com/stats/stat.02674.y2020.eon.t033.html")
       end
 
       it 'creates a Tournament for each tournament found' do
-        expect { service.scrape_new_tournaments }
+        expect { service.scrape_for_new_tournaments }
           .to change { Tournament.count }
           .from(0).to(26)
       end
 
       it 'logs a scrape' do
-        expect { service.scrape_new_tournaments }
+        expect { service.scrape_for_new_tournaments }
           .to change { ScrapeLogger.tournament.count }
           .from(0).to(1)
       end
     end
   end
 
-  describe '#scrape_data' do
+  describe '#scrape_data_from_all_tournaments' do
     context 'when data was scraped recently' do
       before do
         create(
@@ -105,13 +105,13 @@ RSpec.describe Scraper, type: :service do
       end
 
       it 'does not make any requests' do
-        service.scrape_data
+        service.scrape_data_from_all_tournaments
 
         expect(HTTParty).not_to have_received(:get)
       end
 
       it 'does not log a scrape' do
-        expect { service.scrape_data }.not_to change { ScrapeLogger.data.count }
+        expect { service.scrape_data_from_all_tournaments }.not_to change { ScrapeLogger.data.count }
       end
     end
 
@@ -127,13 +127,13 @@ RSpec.describe Scraper, type: :service do
         end
 
         it 'does not make any requests' do
-          service.scrape_data
+          service.scrape_data_from_all_tournaments
 
           expect(HTTParty).not_to have_received(:get)
         end
 
         it 'logs a scrape' do
-          expect { service.scrape_data }
+          expect { service.scrape_data_from_all_tournaments }
             .to change { ScrapeLogger.data.count }
             .from(0).to(1)
         end
@@ -152,12 +152,12 @@ RSpec.describe Scraper, type: :service do
         end
 
         it 'makes 1 request to the PGA site for each tournament, for the one unaccounted-for data source' do
-          service.scrape_data
+          service.scrape_data_from_all_tournaments
 
           expect(HTTParty).to have_received(:get)
-          .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_1.year}.eon.#{tournament_1.pga_id}.html")
+            .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_1.year}.eon.#{tournament_1.pga_id}.html")
           expect(HTTParty).to have_received(:get)
-          .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_2.year}.eon.#{tournament_2.pga_id}.html")
+            .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_2.year}.eon.#{tournament_2.pga_id}.html")
           expect(HTTParty).to have_received(:get).exactly(2).times
         end
 
@@ -165,7 +165,7 @@ RSpec.describe Scraper, type: :service do
 
           expect(DataPoint.count).to eq(2)
 
-          service.scrape_data
+          service.scrape_data_from_all_tournaments
 
           number_of_golfers_in_fixture = 5
           tournaments = Tournament.count
@@ -183,7 +183,7 @@ RSpec.describe Scraper, type: :service do
         end
 
         it 'logs a scrape' do
-          expect { service.scrape_data }
+          expect { service.scrape_data_from_all_tournaments }
             .to change { ScrapeLogger.data.count }
             .from(0).to(1)
         end
