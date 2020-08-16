@@ -10,7 +10,7 @@ class DataSource < ApplicationRecord
   validates :stat, uniqueness: true
 
   def self.not_yet_pulled_for(tournament)
-    DataSource.all - tournament.data_sources.uniq
+    DataSource.where.not(id: tournament.data_sources)
   end
 
   def results_stat?
