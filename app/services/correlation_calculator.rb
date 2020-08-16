@@ -8,14 +8,18 @@ class CorrelationCalculator
   end
 
   def calculate
-    data_sources.each_with_object({}) do |source, hash|
-      hash[source.stat] = correlation(source.stat)
-    end.sort_by { |_, correlations| -correlations }.to_h
+    tournament.update(correlations: correlations.to_json)
   end
 
   private
 
   attr_reader :tournament
+
+  def correlations
+    data_sources.each_with_object({}) do |source, hash|
+      hash[source.stat] = correlation(source.stat)
+    end.sort_by { |_, correlations| -correlations }.to_h
+  end
 
   def correlation(stat)
     Pearson.coefficient(scores, DataSource::RESULTS, stat).truncate(5)

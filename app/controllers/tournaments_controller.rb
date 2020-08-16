@@ -10,7 +10,7 @@ class TournamentsController < ApplicationController
     @data_sources = @tournament.data_sources.uniq
     @data_points = @tournament.data_points
     @golfers = @tournament.golfers.uniq
-    @correlations = CorrelationCalculator.calculate(@tournament)
+    @correlations = JSON.parse(@tournament.correlations)
   end
 
   private
