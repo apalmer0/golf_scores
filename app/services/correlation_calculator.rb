@@ -3,6 +3,12 @@ class CorrelationCalculator
     new(tournament).calculate
   end
 
+  def self.calculate_for_series(pga_id)
+    Tournament.where(pga_id: pga_id).each do |tournament|
+      new(tournament).calculate
+    end
+  end
+
   def initialize(tournament)
     @tournament = tournament
   end
