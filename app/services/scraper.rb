@@ -57,6 +57,8 @@ class Scraper
     DataSource.not_yet_pulled_for(tournament).each do |source|
       scrape_data_source(source, tournament)
     end
+
+    CorrelationCalculator.calculate(tournament)
   end
 
   def scrape_data_source(source, tournament)

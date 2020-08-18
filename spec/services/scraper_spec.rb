@@ -95,6 +95,10 @@ RSpec.describe Scraper, type: :service do
   end
 
   describe '#scrape_data_from_all_tournaments' do
+    before(:each) do
+      allow(CorrelationCalculator).to receive(:calculate)
+    end
+
     context 'when data was scraped recently' do
       before do
         create(
@@ -155,14 +159,13 @@ RSpec.describe Scraper, type: :service do
           service.scrape_data_from_all_tournaments
 
           expect(HTTParty).to have_received(:get)
-            .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_1.year}.eon.#{tournament_1.pga_id}.html")
+            .with("https://www.pgatour.com/stats/stat.#{data_source_2.pga_id}.y#{tournament_1.year}.eon.#{tournament_1.pga_id}.html")
           expect(HTTParty).to have_received(:get)
-            .with("https://www.pgatour.com/content/pgatour/stats/stat.#{data_source_2.pga_id}.y#{tournament_2.year}.eon.#{tournament_2.pga_id}.html")
+            .with("https://www.pgatour.com/stats/stat.#{data_source_2.pga_id}.y#{tournament_2.year}.eon.#{tournament_2.pga_id}.html")
           expect(HTTParty).to have_received(:get).exactly(2).times
         end
 
         it 'creates a new data point for each tournament/data-source/golfer combo' do
-
           expect(DataPoint.count).to eq(2)
 
           service.scrape_data_from_all_tournaments
@@ -180,6 +183,13 @@ RSpec.describe Scraper, type: :service do
             value: '100.00',
             rank: 1,
             })
+        end
+
+        it 'calculates the correlations within the tournament' do
+          service.scrape_data_from_all_tournaments
+
+          expect(CorrelationCalculator).to have_received(:calculate).with(tournament_1)
+          expect(CorrelationCalculator).to have_received(:calculate).with(tournament_2)
         end
 
         it 'logs a scrape' do
