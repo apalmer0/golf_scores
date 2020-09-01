@@ -1,7 +1,7 @@
 class TournamentScraperWorker < ApplicationWorker
   sidekiq_options retry: false
 
-  def perform
-    Scraper.scrape_for_new_tournaments
+  def perform(pga_id)
+    Scraper.new.scrape_tournament_series(pga_id)
   end
 end
