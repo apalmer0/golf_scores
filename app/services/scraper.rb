@@ -62,8 +62,7 @@ class Scraper
   end
 
   def scrape_data_source(source, tournament)
-    url = url_builder(source, tournament)
-
+    url = UrlBuilder.build(source, tournament)
     unparsed_page = HTTParty.get(url)
     results = Parser.parse_table(unparsed_page, source)
 
@@ -115,16 +114,6 @@ class Scraper
       }
 
       Tournament.find_or_create_by(data)
-    end
-  end
-
-  def url_builder(source, tournament)
-    if source.results_stat?
-      name = tournament.name.gsub(" ", "-").downcase
-
-      "https://www.pgatour.com/tournaments/#{name}/past-results/jcr:content/mainParsys/pastresults.selectedYear.#{tournament.year}.html"
-    else
-      "https://www.pgatour.com/stats/stat.#{source.pga_id}.y#{tournament.year}.eon.#{tournament.pga_id}.html"
     end
   end
 end
