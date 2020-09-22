@@ -6,7 +6,7 @@ RSpec.describe UrlBuilder, type: :service do
       source = create(:data_source, stat: DataSource::RESULTS, pga_id: 'sourceId')
       tournament1 = create(:tournament, year: 2015, pga_id: 'tourneyId', name: 'Wrong Name')
       tournament2 = create(:tournament, year: 2016, pga_id: 'tourneyId', name: 'Also Wrong')
-      tournament3 = create(:tournament, year: 2017, pga_id: 'tourneyId', name: 'Correct Name')
+      tournament3 = create(:tournament, year: 2017, pga_id: 'tourneyId', name: 'Correct & Name')
 
       expect(UrlBuilder.build(source, tournament1)).to eql("https://www.pgatour.com/tournaments/correct-name/past-results/jcr:content/mainParsys/pastresults.selectedYear.2015.html")
       expect(UrlBuilder.build(source, tournament2)).to eql("https://www.pgatour.com/tournaments/correct-name/past-results/jcr:content/mainParsys/pastresults.selectedYear.2016.html")

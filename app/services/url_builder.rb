@@ -21,7 +21,7 @@ class UrlBuilder
   attr_reader :source, :tournament
 
   def tournament_name
-    most_recent_matching_tournament.name.gsub(" ", "-").downcase
+    most_recent_matching_tournament.name.gsub('& ', '').gsub(" ", "-").downcase
   end
 
   def most_recent_matching_tournament
