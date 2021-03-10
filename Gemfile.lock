@@ -60,7 +60,7 @@ GEM
       public_suffix (>= 2.0.2, < 5.0)
     autoprefixer-rails (10.0.3.0)
       execjs
-    awesome_print (1.8.0)
+    awesome_print (1.9.2)
     bindex (0.8.1)
     bootsnap (1.7.2)
       msgpack (~> 1.0)
