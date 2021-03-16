@@ -14,7 +14,7 @@ class Tournament < ApplicationRecord
 
   def self.with_incomplete_data
     # wildly inefficient. figure out how to improve this query.
-    tournaments = Tournament.includes(:data_sources).select { |t| t.data_sources.uniq.count < DataSource.count }
+    tournaments = Tournament.includes(:data_sources).select { |t| t.data_sources.uniq.count < DataSource.stats.count }
 
     Tournament.where(id: tournaments.pluck(:id))
   end
