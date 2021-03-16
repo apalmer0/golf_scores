@@ -32,6 +32,16 @@ class Scraper
     log_scrape(:tournament)
   end
 
+  def scrape_series_data(pga_id)
+    return if data_scraped_recently?
+
+    Series.find_by(pga_id: pga_id).tournaments.with_incomplete_data.each do |tournament|
+      calculate_correlations_for(tournament)
+    end
+
+    log_scrape(:data)
+  end
+
   def scrape_tournament_data
     return if data_scraped_recently?
 
