@@ -1,20 +1,15 @@
 class Scraper
-  YEARS = [
-    2015,
-    2016,
-    2017,
-    2018,
-    2019,
-    2020,
-  ]
+  YEARS = [2016,2017,2018,2019,2020,2021]
   SECONDS_BETWEEN_REQUESTS = 5
+  ARBITRARY_STAT = "02674".freeze
+  ARBITRARY_TOURNAMENT = "t033".freeze
 
   def self.scrape_for_new_tournaments
     new.scrape_for_new_tournaments
   end
 
-  def self.scrape_data_from_all_tournaments
-    new.scrape_data_from_all_tournaments
+  def self.scrape_tournament_data
+    new.scrape_tournament_data
   end
 
   def scrape_for_all_tournaments
@@ -37,48 +32,54 @@ class Scraper
     log_scrape(:tournament)
   end
 
-  def scrape_data_from_all_tournaments
+  def scrape_tournament_data
     return if data_scraped_recently?
 
     Tournament.with_incomplete_data.each do |tournament|
-      scrape_tournament(tournament)
+      calculate_correlations_for(tournament)
     end
 
     log_scrape(:data)
   end
 
-  def scrape_tournament_series(pga_id)
-    Tournament.where(pga_id: pga_id).each do |tournament|
-      scrape_tournament(tournament)
+  def calculate_correlations_for(tournament)
+    tournament_results = get_results_for(tournament)
+
+    return if tournament_results.empty?
+
+    golfer_names = tournament_results.keys
+
+    DataSource.stats.not_yet_pulled_for(tournament).each do |source|
+      source_stats = scrape_data_source(source, tournament, golfer_names)
+
+      data = {
+        finishes: tournament_results,
+        stats: source_stats,
+      }
+
+      coefficient = Pearson.coefficient(data, :finishes, :stats).truncate(4)
+
+      Correlation.create(tournament_id: tournament.id, data_source: source, coefficient: coefficient)
     end
   end
 
-  def scrape_tournament(tournament)
-    DataSource.not_yet_pulled_for(tournament).each do |source|
-      scrape_data_source(source, tournament)
-    end
-
-    CorrelationCalculator.calculate(tournament)
-  end
-
-  def scrape_data_source(source, tournament)
+  def get_results_for(tournament)
+    source = DataSource.results
     url = UrlBuilder.build(source, tournament)
     unparsed_page = HTTParty.get(url)
-    results = Parser.parse_table(unparsed_page, source)
 
-    results.each do |data|
-      golfer = GolferFinder.find_or_create_by(data[:name])
+    Parser.create_stats_object(unparsed_page, source)
+  end
 
-      DataPoint.create(
-        tournament: tournament,
-        golfer: golfer,
-        data_source: source,
-        value: data[:stat],
-        rank: data[:rank],
-      )
-    end
+  def scrape_data_source(source, tournament, names)
+    url = UrlBuilder.build(source, tournament)
+    unparsed_page = HTTParty.get(url)
+    results = Parser.create_stats_object(unparsed_page, source, names)
 
+    puts "\n\nPausing between requests...\n\n"
     sleep(SECONDS_BETWEEN_REQUESTS)
+
+    return results
   end
 
   private
@@ -103,17 +104,32 @@ class Scraper
   end
 
   def scrape_for_tournaments(year)
-    url = "https://www.pgatour.com/stats/stat.02674.y#{year}.eon.t033.html"
+    url = "https://www.pgatour.com/stats/stat.#{ARBITRARY_STAT}.y#{year}.eon.#{ARBITRARY_TOURNAMENT}.html"
     unparsed_page = HTTParty.get(url)
     parsed_tournaments = Parser.parse_tournaments(unparsed_page)
 
     parsed_tournaments.each do |tournament_data|
       data = {
-        **tournament_data,
+        name: tournament_data[:name],
+        series: tournament_series(tournament_data, year),
         year: year,
       }
 
       Tournament.find_or_create_by(data)
     end
+  end
+
+  def tournament_series(data, year)
+    series = Series.find_by(pga_id: data[:pga_id])
+
+    if series
+      if series.outdated_name?(year, data[:name])
+        series.update(name: data[:name])
+      end
+    else
+      series = Series.create(data)
+    end
+
+    series
   end
 end

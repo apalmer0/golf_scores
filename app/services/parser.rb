@@ -4,42 +4,33 @@ class Parser
   TOURNAMENT_DROPDOWN = '.statistics-details-select--tournament'.freeze
   STATS_PLAYER_NAME = 'player name'.freeze
   RESULTS_PLAYER_NAME = 'player'.freeze
-  RESULTS_COLUMN = 'td.total-score'.freeze
+  RESULTS_COLUMN = 'span.position.round-4'.freeze
   RANK_COLUMN = 'rank this week'.freeze
 
-  def self.parse_table(unparsed_page, data_source)
-    new(unparsed_page, data_source).parse_table
+  def self.create_stats_object(unparsed_page, data_source, names = [])
+    new(unparsed_page, data_source, names).create_stats_object
   end
 
   def self.parse_tournaments(unparsed_page)
-    new(unparsed_page, nil).parse_tournaments
+    new(unparsed_page, nil, nil).parse_tournaments
   end
 
-  def initialize(unparsed_page, data_source)
+  def initialize(unparsed_page, data_source, names)
     @unparsed_page = unparsed_page
     @data_source = data_source
+    @names = names
   end
 
-  def parse_table
-    table_rows.map.with_index do |tr, index|
-      row_data = tr.css('td').map { |td| td.text.gsub("\t", "").strip }
+  def create_stats_object
+    table_rows.each_with_object({}).with_index do |(row, hash), index|
+      row_data = row.css('td').map { |td| td.text.gsub("\t", "").strip }
 
-      if data_source.results_stat?
-        {
-          name: row_data[name_index],
-          rank: finish[index],
-          stat: scores[index],
-        }
-      else
-        {
-          name: row_data[name_index],
-          rank: row_data[rank_index].delete('^0-9').to_i,
-          stat: row_data[stat_index],
-        }
-      end
+      value = data_source.results_stat? ? finish[index] : row_data[rank_index].delete('^0-9').to_i
 
+      golfer_name = GolferFinder.find_or_create_by(row_data[name_index], names)
 
-    end.compact
+      hash[golfer_name] = value
+    end
   end
 
   def parse_tournaments
@@ -53,7 +44,7 @@ class Parser
 
   private
 
-  attr_reader :data_source, :unparsed_page
+  attr_reader :data_source, :unparsed_page, :names
 
   def parsed_page
     @parsed_page ||= Nokogiri::HTML(unparsed_page)
@@ -99,9 +90,5 @@ class Parser
 
   def rank_index
     @rank_index ||= headers.index(RANK_COLUMN)
-  end
-
-  def stat_index
-    @stat_index ||= headers.index(data_source.stat_column_name)
   end
 end

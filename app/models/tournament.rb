@@ -1,17 +1,19 @@
 class Tournament < ApplicationRecord
   include PgSearch
 
-  has_many :data_points
-  has_many :golfers, through: :data_points
-  has_many :data_sources, through: :data_points
+  belongs_to :series
+
+  has_many :correlations
+  has_many :data_sources, through: :correlations
 
   validates :name, presence: true
-  validates :pga_id, uniqueness: { scope: [:year] }
   validates :year, presence: true
+  validates :year, uniqueness: { scope: :series_id }
 
   pg_search_scope :search_by_name, against: [:name]
 
   def self.with_incomplete_data
+    # wildly inefficient. figure out how to improve this query.
     tournaments = Tournament.includes(:data_sources).select { |t| t.data_sources.uniq.count < DataSource.count }
 
     Tournament.where(id: tournaments.pluck(:id))

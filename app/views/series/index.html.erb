@@ -1,17 +1,13 @@
 <p id="notice"><%= notice %></p>
 
-<h1>Golfers</h1>
-<h4><%= link_to "Data Points", data_points_path %></h4>
+<h1>All Series</h1>
 <h4><%= link_to "Data Sources", data_sources_path %></h4>
-<h4><%= link_to "Golfers", golfers_path %></h4>
-<h4><%= link_to "Tournaments", tournaments_path %></h4>
 
 <h5>Search</h5>
-<%= form_tag golfers_path, method: :get do %>
+<%= form_tag series_index_path, method: :get do %>
   <%= text_field_tag :search, params[:search] %>
   <%= submit_tag "search" %>
 <% end %>
-
 
 <table class="table table-striped">
   <thead class="thead-dark">
@@ -21,9 +17,9 @@
   </thead>
 
   <tbody>
-    <% @golfers.each do |golfer| %>
+    <% @series_list.each do |series| %>
       <tr>
-        <td><%= link_to golfer.name, golfer %></td>
+        <td><%= link_to series.name, series %></td>
       </tr>
     <% end %>
   </tbody>

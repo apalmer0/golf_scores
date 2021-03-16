@@ -6,11 +6,11 @@ RSpec.describe DataScraperWorker, type: :worker do
     subject(:worker) { DataScraperWorker.new }
 
     it 'calls #scrape_data_from_all_tournaments on DataScraper' do
-      allow(Scraper).to receive(:scrape_data_from_all_tournaments)
+      allow(Scraper).to receive(:scrape_tournament_data)
 
       worker.perform
 
-      expect(Scraper).to have_received(:scrape_data_from_all_tournaments)
+      expect(Scraper).to have_received(:scrape_tournament_data)
     end
   end
 end

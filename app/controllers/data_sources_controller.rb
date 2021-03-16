@@ -43,7 +43,7 @@ class DataSourcesController < ApplicationController
   private
 
   def data_source_params
-    params.require(:data_source).permit(:stat, :pga_id, :stat_column_name)
+    params.require(:data_source).permit(:stat, :pga_id)
   end
 
   def set_data_source

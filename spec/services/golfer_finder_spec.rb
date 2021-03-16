@@ -2,25 +2,30 @@ require 'rails_helper'
 
 RSpec.describe GolferFinder, type: :service do
   describe '#find_or_create_by' do
-    name = "Charles Howell III"
+    context 'when there are no names to match' do
+      it 'returns the given name' do
+        name = "Bryson DeChambeau"
+        all_names = []
+
+        expect(GolferFinder.find_or_create_by(name, all_names)).to eq("Bryson DeChambeau")
+      end
+    end
 
     context 'when there is a fuzzy match' do
-      it 'returns the matched golfer' do
-        golfer = create(:golfer, name: "Charles Howell")
+      it 'returns the matched golfer name' do
+        name = "Charley Howell"
+        all_names = ["Charles Howell III", "John Smith"]
 
-        expect(GolferFinder.find_or_create_by(name)).to eq(golfer)
+        expect(GolferFinder.find_or_create_by(name, all_names)).to eq("Charles Howell III")
       end
     end
 
     context 'when there is no fuzzy match' do
-      it 'returns a new golfer' do
-        create(:golfer, name: "John Smith")
+      it 'returns the given name' do
+        name = "Bryson DeChambeau"
+        all_names = ["Charles Howell III", "John Smith"]
 
-        allow(Golfer).to receive(:create)
-
-        GolferFinder.find_or_create_by(name)
-
-        expect(Golfer).to have_received(:create).with(name: name)
+        expect(GolferFinder.find_or_create_by(name, all_names)).to eq("Bryson DeChambeau")
       end
     end
   end

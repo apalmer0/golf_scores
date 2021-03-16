@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<h2>
+  <%= @series.name %>
+</h2>
+<p>
+  <strong>PGA ID:</strong>
+  <%= @series.pga_id %>
+</p>
+
+<p>Correlations with results</p>
+<table class="correlations">
+  <thead>
+    <tr>
+      <th></th>
+      <% @tournaments.pluck(:year).each do |year| %>
+        <th><%= year %></th>
+      <% end %>
+      <th>Avg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @data_sources.each do |data_source| %>
+      <tr>
+        <td><%= data_source.stat %></td>
+        <% @tournaments.each do |tournament| %>
+          <td>
+            <a href=<%= UrlBuilder.build(data_source, tournament) %> target="_blank">
+              <%# # TODO: improve this. %>
+              <%= Correlation.find_by(tournament: tournament, data_source: data_source)&.coefficient&.round(2) %>
+            </a>
+          </td>
+        <% end %>
+        <td><%= @series.average_correlation_for(data_source).round(2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= link_to 'Back', series_index_path %>

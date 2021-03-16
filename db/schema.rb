@@ -10,22 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_16_012229) do
+ActiveRecord::Schema.define(version: 2021_03_15_032826) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "data_points", force: :cascade do |t|
-    t.bigint "golfer_id", null: false
+  create_table "correlations", force: :cascade do |t|
     t.bigint "tournament_id", null: false
-    t.string "value"
-    t.integer "rank"
     t.bigint "data_source_id", null: false
+    t.float "coefficient", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["data_source_id"], name: "index_data_points_on_data_source_id"
-    t.index ["golfer_id"], name: "index_data_points_on_golfer_id"
-    t.index ["tournament_id"], name: "index_data_points_on_tournament_id"
+    t.index ["data_source_id"], name: "index_correlations_on_data_source_id"
+    t.index ["tournament_id"], name: "index_correlations_on_tournament_id"
   end
 
   create_table "data_sources", force: :cascade do |t|
@@ -33,13 +30,6 @@ ActiveRecord::Schema.define(version: 2020_08_16_012229) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.string "pga_id"
-    t.string "stat_column_name"
-  end
-
-  create_table "golfers", force: :cascade do |t|
-    t.string "name"
-    t.datetime "created_at", precision: 6, null: false
-    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "scrape_loggers", force: :cascade do |t|
@@ -49,16 +39,23 @@ ActiveRecord::Schema.define(version: 2020_08_16_012229) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
+  create_table "series", force: :cascade do |t|
+    t.string "pga_id"
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "tournaments", force: :cascade do |t|
     t.string "name"
-    t.string "pga_id"
     t.integer "year"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.json "correlations", default: "{}"
+    t.bigint "series_id", null: false
+    t.index ["series_id"], name: "index_tournaments_on_series_id"
   end
 
-  add_foreign_key "data_points", "data_sources"
-  add_foreign_key "data_points", "golfers"
-  add_foreign_key "data_points", "tournaments"
+  add_foreign_key "correlations", "data_sources"
+  add_foreign_key "correlations", "tournaments"
+  add_foreign_key "tournaments", "series"
 end

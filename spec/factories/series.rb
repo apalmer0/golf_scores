@@ -1,7 +1,6 @@
 FactoryBot.define do
-  factory :tournament do
-    series
+  factory :series do
     sequence(:name) { |n| "tournament-#{n}" }
-    sequence(:year) { |n| n + 1000 }
+    sequence(:pga_id) { |n| "t#{"%03d" % n}" }
   end
 end
