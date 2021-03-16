@@ -7,3 +7,70 @@
     - headers
     - rows
       - array of parsed row data
+
+
+need:
+Xcorrelation table
+X  - tournament_id
+X  - data_source_id
+X  - coefficient
+
+X remove correlations column from tournaments
+X delete golfers table
+X delete datapoints table
+X delete correlation calculator
+X delete a bunch of parser methods
+X update parser to receive a list of golfer names and search from that
+
+X series model
+X  - pga_id
+X  - name
+X  has_many tournaments
+
+
+result
+
+Tournament abc
+       2015 2016  2017  2018  2019  2020 avg
+stat_1  .5  .6      .7    .7    .8    .9  .9
+stat_2  .7  .7      .7    .7    .7    .7  .7
+stat_3  .8  .8      .7    .9    .7    .6  .8
+stat_4  .5  .4      .3    .8    .2    .9  .4
+
+
+fetch results from results page
+store them in memory somewhere with this shape:
+
+data = {
+  'results' => {
+    'john' => 1,
+    'mike' => 2,
+    'paul' => 3,
+    'ryan' => 4,
+  },
+}
+
+X need to update Parser.parse_table (or create new method) to generate that shape
+
+scrape data source. stats will be in memory. coerce them into this shape:
+
+data = {
+  'stat' => {
+    'ryan' => 1,
+    'mike' => 2,
+    'john' => 3,
+    'paul' => 4,
+  },
+}
+
+
+run correlations on results x stat
+
+save correlation -
+Correlation.create(
+  tournament: tournament,
+  data_source: data_source,
+  coefficient: 0.8743533,
+)
+
+build views

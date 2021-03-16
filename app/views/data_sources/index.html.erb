@@ -1,9 +1,7 @@
 <p id="notice"><%= notice %></p>
 
 <h1>Data Sources</h1>
-<h4><%= link_to "Data Points", data_points_path %></h4>
 <h4><%= link_to "Data Sources", data_sources_path %></h4>
-<h4><%= link_to "Golfers", golfers_path %></h4>
 <h4><%= link_to "Tournaments", tournaments_path %></h4>
 
 <%= link_to 'New Data Source', new_data_source_path %>
@@ -13,7 +11,6 @@
     <tr>
       <th>Stat</th>
       <th>PGA ID</th>
-      <th>Stat Column Header</th>
       <th></th>
       <th></th>
       <th></th>
@@ -25,7 +22,6 @@
       <tr>
         <td><%= data_source.stat %></td>
         <td><%= data_source.pga_id %></td>
-        <td><%= data_source.stat_column_name %></td>
         <td><%= link_to 'Show', data_source %></td>
         <td><%= link_to 'Edit', edit_data_source_path(data_source) %></td>
         <td><%= link_to 'Delete', data_source, method: :delete, data: { confirm: 'Are you sure?' } %></td>

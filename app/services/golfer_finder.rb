@@ -1,25 +1,26 @@
 class GolferFinder
-  def self.find_or_create_by(name)
-    new(name).find_or_create_by
+  def self.find_or_create_by(name, all_names)
+    new(name, all_names).find_or_create_by
   end
 
-  def initialize(name)
+  def initialize(name, all_names)
     @name = name
+    @all_names = all_names
   end
 
   def find_or_create_by
-    golfer ? golfer : Golfer.create(name: name)
+    golfer ? golfer : name
   end
 
   private
 
-  attr_reader :name
+  attr_reader :all_names, :name
 
   def golfer
     @golfer ||= golfers.find(name, threshold: 0.75)
   end
 
   def golfers
-    FuzzyMatch.new(Golfer.all, read: :name)
+    FuzzyMatch.new(all_names)
   end
 end
