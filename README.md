@@ -4,7 +4,7 @@ In an effort to win gazillions of dollars in fantasy golf, this app fetches PGA 
 for upcoming tournaments on a player-by-player and stat-by-stat level in order to
 calculate how strongly- or weakly-correlated each stat is with the final result of
 the tournament. The idea is to find which stats are most predictive of success
-and then choose for one's fantasy lineup the golfers who excel at those skills.
+and then choose the golfers who excel at those skills for one's fantasy lineup.
 
 Thus far this hasn't made anyone any money, but we're getting there. Maybe.
 Probably not. Who knows. Regardless it's been a fun challenge.
