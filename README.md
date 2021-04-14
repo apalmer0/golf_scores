@@ -1,24 +1,19 @@
-# README
+# Golf Scores
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+In an effort to win gazillions of dollars in fantasy golf, this app fetches PGA data
+for upcoming tournaments on a player-by-player and stat-by-stat level in order to
+calculate how strongly- or weakly-correlated each stat is with the final result of
+the tournament. The idea is to find which stats are most predictive of success
+and then choose for one's fantasy lineup the golfers who excel at those skills.
 
-Things you may want to cover:
+Thus far this hasn't made anyone any money, but we're getting there. Maybe.
+Probably not. Who knows. Regardless it's been a fun challenge.
 
-* Ruby version
+## How It Works
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+We use Nokogiri to scrape past results as well as stat-specific pages for whichever
+tournament is coming up. By comparing the relative ranking of each golfer to how they
+placed overall at the end of the same tournament in years past, we can calculate the
+correlation coefficient using the Pearson correlation calculation gem. This work is
+handled by Sidekiq and is kicked off by manually calling a specific method. At some
+point it'd make sense to set up a job to automate that part of the work.
