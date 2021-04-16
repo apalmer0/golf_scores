@@ -6,8 +6,7 @@ calculate how strongly- or weakly-correlated each stat is with the final result 
 the tournament. The idea is to find which stats are most predictive of success
 and then choose the golfers who excel at those skills for one's fantasy lineup.
 
-Thus far this hasn't made anyone any money, but we're getting there. Maybe.
-Probably not. Who knows. Regardless it's been a fun challenge.
+Thus far this hasn't made anyone any money, but we're getting there. Maybe. Who knows. Regardless, it's been a fun challenge.
 
 ## How It Works
 
