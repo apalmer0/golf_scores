@@ -15,7 +15,7 @@ gem 'pearson', '~> 1.0'
 gem 'pg', '~> 0.18.4'
 gem 'pg_search', "~> 2.1.4"
 gem 'pry'
-gem 'puma', '~> 4.1'
+gem 'puma', '~> 4.3'
 gem 'rails', '~> 6.0.3', '>= 6.0.3.2'
 gem 'sass-rails', '>= 6'
 gem 'sidekiq'
